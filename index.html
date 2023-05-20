@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>To-Do List</title>
+  <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous"
+  />
+  <style>
+    .completed {
+      background-color: rgb(218, 248, 218);
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container mt-5">
+    <h1>To-Do List</h1>
+
+    <div class="form-group mt-4">
+      <label for="folderName">Folder Name:</label>
+      <input v-model="folderName" type="text" class="form-control" id="folderName" placeholder="Enter folder name">
+      <button @click="createFolder" class="btn btn-primary mt-2">Create Folder</button>
+    </div>
+
+    <div class="form-group mt-4">
+      <label for="task">Task:</label>
+      <input v-model="taskName" type="text" class="form-control" id="task" placeholder="Enter task">
+      <select v-model="selectedFolder" class="form-control" id="folderSelect">
+        <option v-for="folder in folders" :value="folder.name" :key="folder.name">{{ folder.name }}</option>
+      </select>
+      <button @click="addTask" class="btn btn-primary mt-2">Add Task</button>
+    </div>
+
+    <div v-for="(folder, folderIndex) in folders" :key="folderIndex" class="mt-4">
+      <div class="input-group mb-3">
+        <input :value="folder.name" type="text" class="form-control" :disabled="true">
+        <div class="input-group-append">
+          <button class="btn btn-outline-danger" type="button" @click="removeFolder(folderIndex)">Delete</button>
+        </div>
+      </div>
+      <ul class="list-group">
+        <li
+          v-for="(task, taskIndex) in folder.tasks"
+          :key="taskIndex"
+          class="list-group-item"
+          :class="{ 'completed': task.completed }"
+        >
+          {{ task.name }}
+          <span class="float-right">
+            <button v-if="!task.completed" class="btn btn-success btn-sm" @click="toggleComplete(folderIndex, taskIndex)">Complete</button>
+            <button class="btn btn-danger btn-sm" @click="removeTask(folderIndex, taskIndex)">Delete</button>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          folderName: '',
+          taskName: '',
+          selectedFolder: '',
+          folders: [],
+        };
+      },
+      methods: {
+        createFolder() {
+          if (this.folderName.trim() !== '') {
+            const folder = {
+              name: this.folderName,
+              tasks: [],
+            };
+            this.folders.push(folder);
+            this.folderName = '';
+          }
+        },
+        addTask() {
+          if (this.taskName.trim() !== '' && this.selectedFolder !== '') {
+            const task = {
+              name: this.taskName,
+              completed: false,
+            };
+            const folderIndex = this.folders.findIndex(folder => folder.name === this.selectedFolder);
+            if (folderIndex !== -1) {
+              this.folders[folderIndex].tasks.push(task);
+            }
+            this.taskName = '';
+            this.selectedFolder = '';
+          }
+        },
+        toggleComplete(folderIndex, taskIndex) {
+          this.folders[folderIndex].tasks[taskIndex].completed = !this.folders[folderIndex].tasks[taskIndex].completed;
+        },
+        removeTask(folderIndex, taskIndex) {
+          this.folders[folderIndex].tasks.splice(taskIndex, 1);
+        },
+        removeFolder(folderIndex) {
+          this.folders.splice(folderIndex, 1);
+        },
+      },
+    });
+  </script>
+</body>
+</html>
